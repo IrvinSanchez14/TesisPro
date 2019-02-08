@@ -5,8 +5,10 @@ class App extends Component {
   constructor() {
     super();
     this.state = {
-      title: '',
-      description: '',
+      total_efectivo: '',
+      total_pos: '',
+      total_compras: '',
+      fechatiempo: '0000-00-00 00:00:00',
       tasks: []
     }
     this.addTask = this.addTask.bind(this);
@@ -18,7 +20,7 @@ class App extends Component {
   }
 
   addTask(e) {
-    fetch('/api/tasks', {
+    fetch('http://localhost/api-tesis/cortez/create.php', {
       method: 'POST',
       body: JSON.stringify(this.state),
       headers: {
@@ -27,11 +29,11 @@ class App extends Component {
       }
     }).then(res => res.json())
     .then(data => {
-      console.log(data)
       M.toast({html: 'task Saved'});
       this.setState({
-        title: '',
-        description: ''
+        total_efectivo: '',
+        total_pos: '',
+        total_compras: '',
       });
       this.fetchTasks();
     })
@@ -41,13 +43,12 @@ class App extends Component {
   }
 
   fetchTasks() {
-    fetch('/api/tasks')
+    fetch('http://localhost/api-tesis/cortez/read.php')
       .then(res => res.json())
       .then(data => {
         this.setState({
           tasks: data
         });
-        console.log(this.state)
       });
   }
 
@@ -60,8 +61,11 @@ class App extends Component {
 
   deleteTask(id) {
     if ( confirm('estas seguro de eliminarlo')) {
-      fetch(`/api/tasks/${id}`, {
+      fetch('http://localhost/api-tesis/cortez/delete.php', {
         method: 'DELETE',
+        body: JSON.stringify({
+          ID_cortez: id
+        }),
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
@@ -82,7 +86,7 @@ class App extends Component {
         {/* NAVIGATION*/}
         <nav className="light-blue darken-4">
           <div className="container">
-            <a className="brand-logo" href="/">MERN</a>
+            <a className="brand-logo" href="/">PICNIC CORTEZ</a>
           </div>
         </nav>
         <div className="container">
@@ -93,12 +97,17 @@ class App extends Component {
                   <form onSubmit={this.addTask}>
                     <div className="row">
                       <div className="input field col s12">
-                        <input name="title" type="text" placeholder="task title" onChange={this.handleChange} value={this.state.title} />
+                        <input name="total_efectivo" type="text" placeholder="total Efectivo" onChange={this.handleChange} value={this.state.total_efectivo} />
                       </div>
                     </div>
                     <div className="row">
                       <div className="input field col s12">
-                        <textarea name="description" onChange={this.handleChange} placeholder="task title" className="materialize-textarea" value={this.state.description} />
+                        <textarea name="total_pos" onChange={this.handleChange} placeholder="total POS" className="materialize-textarea" value={this.state.total_pos} />
+                      </div>
+                    </div>
+                    <div className="row">
+                      <div className="input field col s12">
+                        <textarea name="total_compras" onChange={this.handleChange} placeholder="total_compras" className="materialize-textarea" value={this.state.total_compras} />
                       </div>
                     </div>
                     <button className="btn light-blue darken-4" type="submit"> Send</button>
@@ -110,23 +119,27 @@ class App extends Component {
               <table>
                 <thead>
                   <tr>
-                    <th>Title</th>
-                    <th>Description</th>
+                    <th>Total Efectivo</th>
+                    <th>Total_POS</th>
+                    <th>Total_compras</th>
+                    <th>Fecha y Hora</th>
                   </tr>
                 </thead>
                 <tbody>
                   {
                     this.state.tasks.map(task => {
                       return (
-                        <tr key={task._id}>
-                          <td>{task.title}</td>
-                          <td>{task.description}</td>
+                        <tr key={task.ID_cortez}>
+                          <td>{`$ ${task.total_efectivo}`}</td>
+                          <td>{`$ ${task.total_pos}`}</td>
+                          <td>{`$ ${task.total_compras}`}</td>
+                          <td>{task.fechatiempo}</td>
                           <td>
-                            <button className="btn light-blue darken-4" onClick={() => this.editTask(task._id)}>
+                            <button className="btn light-blue darken-4" onClick={() => this.editTask(task.ID_cortez)}>
                               <i className="material-icons">edit</i>
                               Edit
                             </button>
-                            <button className="btn light-blue darken-4" style={{margin: '4px'}} onClick={() => this.deleteTask(task._id)}>
+                            <button className="btn light-blue darken-4" style={{margin: '2px'}} onClick={() => this.deleteTask(task.ID_cortez)}>
                             <i className="material-icons">delete</i>
                             </button>
                           </td>
